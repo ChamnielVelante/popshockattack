@@ -18,6 +18,21 @@ function toISODate(d = new Date()) {
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
 
+// Peso formatting for stat tiles, chart axes, and tooltips
+const peso = v => '₱' + Number(v).toLocaleString();
+
+// "2026-07" -> "Jul 2026" for chart labels
+function monthLabel(key) {
+    const [y, m] = key.split('-');
+    return new Date(Number(y), Number(m) - 1).toLocaleString('en-US', { month: 'short', year: 'numeric' });
+}
+
+// "2026-07-04" -> "Jul 4" without UTC parsing surprises
+function dayLabel(key) {
+    const [y, m, d] = key.split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleString('en-US', { month: 'short', day: 'numeric' });
+}
+
 // Inline SVG icons (Lucide, ISC license — lucide.dev). Rendered at 1em and
 // stroked with currentColor so they inherit the button's size and color.
 const ICONS = {
