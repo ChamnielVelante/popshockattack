@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
+// The MotoTrack frontend is the static app in public/index.html
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('/index.html');
 });

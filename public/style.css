@@ -96,17 +96,58 @@ body {
 .login-panel-left {
     flex: 1;
     background-color: #141414;
-    background-image: 
+    background-image:
         repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 10px),
         repeating-linear-gradient(-45deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 10px),
         radial-gradient(ellipse at 25% 60%, rgba(217,56,30,0.25) 0%, transparent 55%),
         radial-gradient(ellipse at 75% 25%, rgba(255,87,51,0.12) 0%, transparent 50%);
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 2.5rem;
     padding: 3rem;
     position: relative;
     overflow: hidden;
+}
+
+.login-tagline {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    max-width: 580px;
+}
+
+.login-tagline h2 {
+    color: #fff;
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.6rem;
+}
+
+.login-tagline p {
+    color: rgba(255,255,255,0.55);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.login-feature-pills {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6rem;
+    margin-top: 1.25rem;
+}
+
+.login-feature-pills span {
+    border: 1px solid rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.75);
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.4rem 1rem;
+    border-radius: 999px;
+    white-space: nowrap;
 }
 
 .login-panel-left::after {
@@ -173,7 +214,21 @@ body {
     font-size: 3.2rem;
     margin-bottom: 10px;
     display: block;
+    color: var(--primary);
     filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+}
+
+.logo-icon svg {
+    width: 1em;
+    height: 1em;
+}
+
+/* Inline SVG icons inside buttons/badges — sized by the text around them */
+.icon {
+    width: 1em;
+    height: 1em;
+    display: inline-block;
+    vertical-align: -0.125em;
 }
 
 .brand-header h1 {
@@ -295,6 +350,26 @@ body {
     box-shadow: 0 8px 20px rgba(239,68,68,0.30);
 }
 
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Expense actions are data entry, not destructive — amber, so red stays
+   reserved for the brand (primary) and true delete/cancel actions. */
+.btn-expense {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(245,158,11,0.25);
+}
+
+.btn-expense:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(245,158,11,0.30);
+}
+
 .btn-edit {
     background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
     color: #fff;
@@ -328,19 +403,6 @@ body {
     margin-bottom: 1.25rem;
     border: 1px solid #fecaca;
 }
-
-.demo-guide {
-    margin-top: 1.75rem;
-    padding: 1.25rem;
-    background: var(--bg-panel);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    font-size: 0.82rem;
-    color: var(--text-secondary);
-}
-
-.demo-guide ul { list-style: none; margin-top: 6px; }
-.demo-guide li { padding: 2px 0; }
 
 .auth-link {
     text-align: center;
@@ -686,12 +748,27 @@ body {
 
 .stat-card {
     background: var(--bg-white);
-    padding: 1.75rem;
+    padding: 1.4rem 1.5rem;
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
-    text-align: center;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-align: left;
     border: 1px solid var(--border);
     transition: box-shadow 0.2s, transform 0.2s;
+}
+
+/* Soft-tinted icon chip on the left of each metric card */
+.stat-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    flex-shrink: 0;
 }
 
 .stat-card:hover {
@@ -700,10 +777,12 @@ body {
 }
 
 .stat-card h3 {
-    font-size: 2.75rem;
+    font-size: 1.9rem;
     font-weight: 700;
-    color: var(--primary);
-    margin-bottom: 4px;
+    /* Values wear neutral ink; the tile's colored border + label carry the
+       meaning. Keeps brand red reserved for chrome, warnings, and actions. */
+    color: var(--text-primary);
+    margin-bottom: 2px;
     line-height: 1;
     font-family: 'Bebas Neue', sans-serif;
     letter-spacing: 1px;
