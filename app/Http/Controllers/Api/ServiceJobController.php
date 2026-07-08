@@ -2,21 +2,37 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\JobStage;
+use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AssignMechanicRequest;
+use App\Http\Requests\StoreJobRequest;
+use App\Http\Requests\UpdateSpecsRequest;
+use App\Http\Requests\UpdateStageRequest;
+use App\Http\Resources\ServiceJobResource;
 use App\Models\AppUser;
-use App\Models\InventoryItem;
 use App\Models\ServiceJob;
+use App\Notifications\JobStageChanged;
+use App\Services\BillingService;
+use App\Services\InventoryDeductionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 
 class ServiceJobController extends Controller
 {
+    public function __construct(
+        private readonly BillingService $billing,
+        private readonly InventoryDeductionService $inventory,
+    ) {}
+
     /**
      * Full job board for admin/staff.
      */
     public function index(): JsonResponse
     {
-        return response()->json(ServiceJob::all());
+        return response()->json(ServiceJobResource::collection(ServiceJob::all()));
     }
 
     /**
@@ -24,26 +40,21 @@ class ServiceJobController extends Controller
      */
     public function myJobs(Request $request): JsonResponse
     {
-        return response()->json(
+        return response()->json(ServiceJobResource::collection(
             ServiceJob::where('app_user_id', $request->user()->id)->get()
-        );
+        ));
     }
 
     /**
      * Register a new intake and link it to the customer's account when one exists,
      * so the customer portal can show it without exposing other customers' jobs.
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreJobRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'customer' => 'required|string|max:255',
-            'moto' => 'required|string|max:255',
-            'plate' => 'required|string|max:255',
-            'dateIn' => 'required|date',
-        ]);
+        $validated = $request->validated();
 
         $customerAccount = AppUser::where('username', $validated['customer'])
-            ->where('role', 'customer')
+            ->where('role', UserRole::Customer->value)
             ->first();
 
         $job = ServiceJob::create([
@@ -51,132 +62,131 @@ class ServiceJobController extends Controller
             'app_user_id' => $customerAccount?->id,
             'moto_model' => $validated['moto'],
             'plate_number' => $validated['plate'],
-            'stage' => 'Intake',
+            'stage' => JobStage::Intake->value,
             'date_in' => $validated['dateIn'],
         ]);
 
-        return response()->json(['message' => 'Job successfully saved!', 'job' => $job], 201);
+        return response()->json([
+            'message' => 'Job successfully saved!',
+            'job' => new ServiceJobResource($job),
+        ], 201);
     }
 
     /**
-     * Move a job through the Kanban stages. Reaching Release starts
-     * the 6-month warranty window.
+     * Move a job through the Kanban stages. Reaching Release starts the
+     * warranty window. The owner and the job's customer are notified.
      */
-    public function updateStage(Request $request, int $id): JsonResponse
+    public function updateStage(UpdateStageRequest $request, ServiceJob $job): JsonResponse
     {
-        $job = ServiceJob::find($id);
+        $job->stage = $request->validated()['stage'];
 
-        if (! $job) {
-            return response()->json(['message' => 'Job not found'], 404);
-        }
-
-        $validated = $request->validate([
-            'stage' => 'required|in:Intake,Disassembly,Tuning,QA,Release',
-        ]);
-
-        $job->stage = $validated['stage'];
-
-        if ($validated['stage'] === 'Release') {
-            $job->warranty_expires_at = now()->addMonths(6);
+        if ($job->stage === JobStage::Release->value) {
+            $job->warranty_expires_at = now()->addMonths(config('shop.warranty_months'));
         }
 
         $job->save();
 
-        return response()->json(['message' => 'Stage updated successfully', 'job' => $job]);
+        $this->notifyStageChange($job, $request);
+
+        return response()->json([
+            'message' => 'Stage updated successfully',
+            'job' => new ServiceJobResource($job),
+        ]);
     }
 
     /**
-     * Log tuning specs and billing, advance the job to QA, and deduct
-     * the consumables used from inventory.
+     * Log tuning specs, compute the bill server-side, advance the job to QA,
+     * and deduct the consumables used from inventory — atomically.
      */
-    public function updateSpecs(Request $request, int $id): JsonResponse
+    public function updateSpecs(UpdateSpecsRequest $request, ServiceJob $job): JsonResponse
     {
-        $job = ServiceJob::find($id);
+        $validated = $request->validated();
 
-        if (! $job) {
-            return response()->json(['message' => 'Job not found'], 404);
-        }
+        // The bill is always computed here, never taken from the client,
+        // so a tampered request cannot underpay a job.
+        $totalBill = $this->billing->computeTotal(
+            enginePrice: (int) $validated['enginePrice'],
+            isWarrantyClaim: (bool) $validated['isWarranty'],
+            oilSealSize: $validated['rawOsSize'] ?? null,
+            oilSealQty: (int) ($validated['rawOsQty'] ?? 0),
+            dustSealSize: $validated['rawDsSize'] ?? null,
+            dustSealQty: (int) ($validated['rawDsQty'] ?? 0),
+            springs: $validated['rawSprings'] ?? null,
+        );
 
-        $validated = $request->validate([
-            'enginePrice' => 'required|numeric|min:0',
-            'totalBill' => 'required|numeric|min:0',
-            'oil' => 'required|string',
-            'oilSeal' => 'required|string',
-            'dustSeal' => 'required|string',
-            'springs' => 'required|string',
-            'isWarranty' => 'required|boolean',
-            'rawOil' => 'nullable|string',
-            'rawOsSize' => 'nullable|string',
-            'rawOsQty' => 'nullable|integer|min:0',
-            'rawDsSize' => 'nullable|string',
-            'rawDsQty' => 'nullable|integer|min:0',
-            'rawSprings' => 'nullable|string',
+        // Job update and stock deduction succeed or fail together.
+        DB::transaction(function () use ($job, $validated, $totalBill) {
+            $job->specs = [
+                'enginePrice' => (int) $validated['enginePrice'],
+                'totalBill' => $totalBill,
+                'oil' => $validated['oil'],
+                'oilSeal' => $validated['oilSeal'],
+                'dustSeal' => $validated['dustSeal'],
+                'springs' => $validated['springs'],
+            ];
+            $job->is_warranty_claim = (bool) $validated['isWarranty'];
+            $job->stage = JobStage::QA->value;
+            $job->save();
+
+            $this->inventory->deductForSpecs(
+                oil: $validated['rawOil'] ?? null,
+                oilSealSize: $validated['rawOsSize'] ?? null,
+                oilSealQty: (int) ($validated['rawOsQty'] ?? 0),
+                dustSealSize: $validated['rawDsSize'] ?? null,
+                dustSealQty: (int) ($validated['rawDsQty'] ?? 0),
+                springs: $validated['rawSprings'] ?? null,
+            );
+        });
+
+        $this->notifyStageChange($job, $request);
+
+        return response()->json([
+            'message' => 'Specs logged and inventory deducted!',
+            'job' => new ServiceJobResource($job),
         ]);
-
-        $job->specs = [
-            'enginePrice' => $validated['enginePrice'],
-            'totalBill' => $validated['totalBill'],
-            'oil' => $validated['oil'],
-            'oilSeal' => $validated['oilSeal'],
-            'dustSeal' => $validated['dustSeal'],
-            'springs' => $validated['springs'],
-        ];
-        $job->is_warranty_claim = $validated['isWarranty'];
-        $job->stage = 'QA';
-        $job->save();
-
-        $this->deductStock($validated['rawOil'] ?? null);
-        $this->deductStock($validated['rawOsSize'] ?? null, (int) ($validated['rawOsQty'] ?? 0));
-        $this->deductStock($validated['rawDsSize'] ?? null, (int) ($validated['rawDsQty'] ?? 0));
-        $this->deductStock($validated['rawSprings'] ?? null);
-
-        return response()->json(['message' => 'Specs logged and inventory deducted!', 'job' => $job]);
     }
 
     /**
      * Assign (or unassign) the mechanic responsible for a job.
      */
-    public function assignMechanic(Request $request, int $id): JsonResponse
+    public function assignMechanic(AssignMechanicRequest $request, ServiceJob $job): JsonResponse
     {
-        $job = ServiceJob::find($id);
-
-        if (! $job) {
-            return response()->json(['message' => 'Job not found'], 404);
-        }
-
-        $validated = $request->validate([
-            'mechanic' => 'nullable|string|max:255',
-        ]);
-
-        $job->mechanic_name = $validated['mechanic'] ?? null;
+        $job->mechanic_name = $request->validated()['mechanic'] ?? null;
         $job->save();
 
-        return response()->json(['message' => 'Mechanic assigned successfully', 'job' => $job]);
+        return response()->json([
+            'message' => 'Mechanic assigned successfully',
+            'job' => new ServiceJobResource($job),
+        ]);
     }
 
     /**
      * Cancel and permanently delete a job.
      */
-    public function destroy(int $id): JsonResponse
+    public function destroy(ServiceJob $job): JsonResponse
     {
-        $job = ServiceJob::find($id);
-
-        if (! $job) {
-            return response()->json(['message' => 'Job not found'], 404);
-        }
-
         $job->delete();
 
         return response()->json(['message' => 'Job successfully deleted']);
     }
 
     /**
-     * Decrement stock for a named consumable. "None" and empty values are skipped.
+     * Notify the owner(s) and the job's customer about a stage change,
+     * skipping whoever performed the action.
      */
-    private function deductStock(?string $name, int $qty = 1): void
+    private function notifyStageChange(ServiceJob $job, Request $request): void
     {
-        if ($name && $name !== 'None' && $qty > 0) {
-            InventoryItem::where('name', $name)->decrement('stock', $qty);
+        $recipients = AppUser::where('role', UserRole::Admin->value)
+            ->where('id', '!=', $request->user()->id)
+            ->get();
+
+        if ($job->app_user_id && $job->app_user_id !== $request->user()->id) {
+            $customer = AppUser::find($job->app_user_id);
+            if ($customer) {
+                $recipients->push($customer);
+            }
         }
+
+        Notification::send($recipients, new JobStageChanged($job));
     }
 }

@@ -1,0 +1,485 @@
+/* ================================================= */
+/* MOTOTRACK — COMPONENTS                            */
+/* Cards, small buttons, badges, tables, modals,     */
+/* toasts, notification bell                         */
+/* ================================================= */
+
+/* ------------------------------------------------- */
+/* CARDS                                             */
+/* ------------------------------------------------- */
+.card {
+    background: var(--bg-white);
+    padding: 1.25rem;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+    border-top: 3px solid var(--primary);
+    position: relative;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.card h4 {
+    color: var(--primary);
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    line-height: 1.3;
+}
+
+.card p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 2px;
+    line-height: 1.4;
+}
+
+.specs-box {
+    background: #f8f9fa;
+    border-left: 3px solid var(--primary);
+    padding: 10px 12px;
+    margin-top: 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    line-height: 1.5;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.action-btns {
+    margin-top: 12px;
+    display: flex;
+    gap: 6px;
+    flex-direction: column;
+}
+
+/* ------------------------------------------------- */
+/* SMALL BUTTONS                                     */
+/* ------------------------------------------------- */
+.btn-sm {
+    width: 100%;
+    padding: 0.55rem 0.9rem;
+    border: none;
+    background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+    color: #f9fafb;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+}
+
+.btn-sm:hover {
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* Color variants must beat .btn-sm's dark default (defined above) */
+.btn-sm.btn-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: #fff;
+}
+
+.btn-sm.btn-danger:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    box-shadow: 0 4px 10px rgba(239,68,68,0.30);
+}
+
+.btn-sm.btn-success {
+    background: #28a745;
+    color: #fff;
+}
+
+.btn-sm.btn-success:hover {
+    background: #1f8c38;
+    box-shadow: 0 4px 10px rgba(40,167,69,0.30);
+}
+
+/* Compact action buttons inside table rows (kanban keeps full-width .btn-sm) */
+.row-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.row-actions .btn-sm {
+    width: auto;
+    padding: 0.5rem 0.95rem;
+    font-size: 0.8rem;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+/* ------------------------------------------------- */
+/* BADGES                                            */
+/* ------------------------------------------------- */
+.badge-done {
+    background: #dcfce7;
+    color: #15803d;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: inline-block;
+    letter-spacing: 0.5px;
+    border: 1px solid #bbf7d0;
+}
+
+.badge-warranty {
+    background: #fef9c3;
+    color: #92400e;
+    padding: 3px 9px;
+    border-radius: 10px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    border: 1px solid #fde68a;
+    letter-spacing: 0.3px;
+}
+
+/* Inventory stock-status pills — same soft style as .badge-done */
+.badge-good {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: inline-block;
+    letter-spacing: 0.5px;
+}
+
+.badge-low {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: inline-block;
+    letter-spacing: 0.5px;
+}
+
+/* ------------------------------------------------- */
+/* NOTIFICATION BELL + DROPDOWN PANEL                */
+/* ------------------------------------------------- */
+.notif-wrap {
+    position: relative;
+}
+
+.notif-bell {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: #fff;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.notif-bell svg {
+    width: 19px;
+    height: 19px;
+}
+
+.notif-bell:hover {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.notif-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    background: var(--primary);
+    color: #fff;
+    border-radius: 10px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notif-panel {
+    position: absolute;
+    top: 48px;
+    right: 0;
+    width: 320px;
+    max-height: 380px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    z-index: 500;
+}
+
+.notif-header {
+    padding: 12px 16px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+}
+
+.notif-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f1f2f4;
+}
+
+.notif-item:last-child { border-bottom: none; }
+
+.notif-item.unread {
+    background: #fff7f5;
+    border-left: 3px solid var(--primary);
+}
+
+.notif-message {
+    font-size: 0.87rem;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+.notif-time {
+    margin-top: 4px;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.notif-empty {
+    padding: 24px 16px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+/* ------------------------------------------------- */
+/* DATA TABLE (Inventory / Reports / Users)          */
+/* ------------------------------------------------- */
+.table-container {
+    background: var(--bg-white);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    width: 100%;
+    border: 1px solid var(--border);
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.data-table thead {
+    background: #f8f9fb;
+    border-bottom: 2px solid var(--border);
+}
+
+.data-table th {
+    padding: 1rem 1.25rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary); /* denser than --text-muted for readability */
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    font-weight: 700;
+}
+
+.data-table td {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.data-table tbody tr { transition: background 0.15s; }
+.data-table tbody tr:hover { background: #fafbfd; }
+.data-table tbody tr:last-child td { border-bottom: none; }
+
+.text-danger {
+    color: var(--primary);
+    font-weight: 700;
+    background: #fef2f2;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    border: 1px solid #fecaca;
+}
+
+.btn-add-stock {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: #fff;
+    border: none;
+    padding: 0.45rem 0.9rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(37,99,235,0.25);
+}
+
+.btn-add-stock:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(37,99,235,0.30);
+}
+
+/* ------------------------------------------------- */
+/* MODALS                                            */
+/* ------------------------------------------------- */
+.modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(10,12,16,0.65);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    animation: fadeIn 0.2s ease;
+}
+
+.modal-content {
+    background: var(--bg-white);
+    width: 460px;
+    max-width: calc(100vw - 2rem);
+    border-radius: var(--radius-lg);
+    padding: 2rem 2.25rem;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.20), 0 4px 16px rgba(0,0,0,0.08);
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(16px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1rem;
+}
+
+.modal-header h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.modal-close {
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    border: none;
+    background: #f3f4f6;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    background: #fee2e2;
+    color: var(--primary);
+}
+
+/* Warranty notice box in the specs modal */
+div[style*="fff3cd"] {
+    background: #fffbeb !important;
+    border-left-color: #f59e0b !important;
+    border-radius: var(--radius-sm);
+}
+
+/* ------------------------------------------------- */
+/* TOAST NOTIFICATIONS                               */
+/* ------------------------------------------------- */
+.toast-container {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+}
+
+.toast {
+    padding: 0.9rem 1.25rem;
+    border-radius: var(--radius-sm);
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.9rem;
+    font-family: 'DM Sans', sans-serif;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.08);
+    animation: slideInRight 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+    min-width: 280px;
+    max-width: 360px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: auto;
+    backdrop-filter: blur(10px);
+}
+
+.toast.error   { background: linear-gradient(135deg, #d9381e, #b52b16); border-left: 4px solid #7f1d1d; }
+.toast.success { background: linear-gradient(135deg, #16a34a, #15803d); border-left: 4px solid #14532d; }
+.toast.warning { background: linear-gradient(135deg, #f59e0b, #d97706); border-left: 4px solid #92400e; color: #1c1917; }
+
+.toast-close {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding-left: 12px;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    line-height: 1;
+}
+
+.toast-close:hover { opacity: 1; }
+
+@keyframes slideInRight {
+    from { transform: translateX(110%); opacity: 0; }
+    to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes fadeOut {
+    to { opacity: 0; transform: translateY(8px); }
+}

@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
+use App\Http\Resources\UserResource;
 use App\Models\AppUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -15,36 +17,29 @@ class UserController extends Controller
      */
     public function index(): JsonResponse
     {
-        return response()->json(AppUser::all());
+        return response()->json(UserResource::collection(AppUser::all()));
     }
 
     /**
      * Approve a pending customer registration.
      */
-    public function approve(int $id): JsonResponse
+    public function approve(AppUser $user): JsonResponse
     {
-        $user = AppUser::find($id);
-
-        if (! $user) {
-            return response()->json(['message' => 'User not found'], 404);
-        }
-
         $user->status = 'approved';
         $user->save();
 
-        return response()->json(['message' => 'User approved!', 'user' => $user]);
+        return response()->json([
+            'message' => 'User approved!',
+            'user' => new UserResource($user),
+        ]);
     }
 
     /**
      * Owner creates an account directly, pre-approved and with any role.
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreUserRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'username' => 'required|string|min:3|max:50|unique:app_users,username',
-            'password' => 'required|string|min:6',
-            'role' => 'required|in:admin,staff,customer',
-        ]);
+        $validated = $request->validated();
 
         $user = AppUser::create([
             'username' => $validated['username'],
@@ -53,25 +48,18 @@ class UserController extends Controller
             'status' => 'approved',
         ]);
 
-        return response()->json(['message' => 'User created successfully', 'user' => $user], 201);
+        return response()->json([
+            'message' => 'User created successfully',
+            'user' => new UserResource($user),
+        ], 201);
     }
 
     /**
      * Update an account's username, role, and optionally its password.
      */
-    public function update(Request $request, int $id): JsonResponse
+    public function update(UpdateUserRequest $request, AppUser $user): JsonResponse
     {
-        $user = AppUser::find($id);
-
-        if (! $user) {
-            return response()->json(['message' => 'User not found'], 404);
-        }
-
-        $validated = $request->validate([
-            'username' => ['required', 'string', 'min:3', 'max:50', Rule::unique('app_users', 'username')->ignore($user->id)],
-            'role' => 'required|in:admin,staff,customer',
-            'password' => 'nullable|string|min:6',
-        ]);
+        $validated = $request->validated();
 
         $user->username = $validated['username'];
         $user->role = $validated['role'];
@@ -82,22 +70,19 @@ class UserController extends Controller
 
         $user->save();
 
-        return response()->json(['message' => 'User updated successfully', 'user' => $user]);
+        return response()->json([
+            'message' => 'User updated successfully',
+            'user' => new UserResource($user),
+        ]);
     }
 
     /**
      * Delete an account (an admin cannot delete their own).
      */
-    public function destroy(Request $request, int $id): JsonResponse
+    public function destroy(Request $request, AppUser $user): JsonResponse
     {
-        if ((int) $id === $request->user()->id) {
+        if ($user->id === $request->user()->id) {
             return response()->json(['message' => 'You cannot delete your own account'], 422);
-        }
-
-        $user = AppUser::find($id);
-
-        if (! $user) {
-            return response()->json(['message' => 'User not found'], 404);
         }
 
         $user->delete();

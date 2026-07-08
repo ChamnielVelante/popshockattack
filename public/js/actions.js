@@ -165,11 +165,12 @@ window.submitSpecs = async function (e) {
         return;
     }
 
-    const totalBill = computeBill({ enginePrice, isWarranty, osSize, osQty, dsSize, dsQty, springs });
+    // Preview only — the server recomputes the bill from the raw inputs,
+    // so a tampered request can never change the amount charged.
+    const previewBill = computeBill({ enginePrice, isWarranty, osSize, osQty, dsSize, dsQty, springs });
 
     const payload = {
         enginePrice: enginePrice,
-        totalBill: totalBill,
         oil: oil,
         oilSeal: osSize !== 'None' ? `${osSize} (${osQty} - ${osSide})` : 'None',
         dustSeal: dsSize !== 'None' ? `${dsSize} (${dsQty} - ${dsSide})` : 'None',
@@ -189,9 +190,11 @@ window.submitSpecs = async function (e) {
         const response = await apiFetch(`/api/jobs/${jobId}/specs`, { method: 'PUT', body: JSON.stringify(payload) });
 
         if (response.ok) {
+            const data = await response.json().catch(() => ({}));
+            const billedTotal = data.job?.specs?.totalBill ?? previewBill;
             e.target.reset();
             closeModal('modal-specs');
-            showNotification(`Specs logged. Bill: ₱${totalBill.toLocaleString()}`, 'success');
+            showNotification(`Specs logged. Bill: ₱${Number(billedTotal).toLocaleString()}`, 'success');
             await loadView('kanban');
         } else {
             showNotification('Error logging specs.', 'error');

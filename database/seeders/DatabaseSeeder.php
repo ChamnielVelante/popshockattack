@@ -13,8 +13,8 @@ class DatabaseSeeder extends Seeder
     {
         // Call your custom shop seeders
         $this->call([
-            \Database\Seeders\InventorySeeder::class,
-            \Database\Seeders\AppUserSeeder::class,
+            InventorySeeder::class,
+            AppUserSeeder::class,
         ]);
     }
 }

@@ -1,0 +1,256 @@
+/* ================================================= */
+/* MOTOTRACK — VIEWS                                 */
+/* Kanban board, dashboard stats/charts, customer    */
+/* progress tracker, responsive + print (kept last)  */
+/* ================================================= */
+
+/* ------------------------------------------------- */
+/* KANBAN BOARD                                      */
+/* ------------------------------------------------- */
+.kanban-board {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    overflow-x: auto;
+    padding-bottom: 1.5rem;
+    height: 100%;
+}
+
+.kanban-board::-webkit-scrollbar { height: 6px; }
+.kanban-board::-webkit-scrollbar-track { background: transparent; }
+.kanban-board::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.stage-column {
+    background: #eaecf0;
+    width: 296px;
+    min-width: 296px;
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+    border: 1px solid #dde1e7;
+}
+
+.stage-header {
+    padding: 0.9rem 1.1rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    border-bottom: 2px solid #d1d5db;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 1.5px;
+    background: #e4e7ec;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.job-list {
+    padding: 0.9rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex: 1;
+}
+
+.job-list::-webkit-scrollbar { width: 4px; }
+.job-list::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 2px; }
+
+/* ------------------------------------------------- */
+/* CUSTOMER JOB PROGRESS TRACKER (Intake → Release)  */
+/* ------------------------------------------------- */
+.stage-tracker {
+    display: flex;
+    align-items: flex-start;
+    margin: 16px 0 8px;
+}
+
+.stage-step {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+/* Connector line drawn from each step back to the previous one */
+.stage-step:not(:first-child)::before {
+    content: '';
+    position: absolute;
+    top: 11px;
+    right: 50%;
+    width: 100%;
+    height: 3px;
+    background: var(--border);
+    z-index: 0;
+}
+
+.stage-step.done:not(:first-child)::before,
+.stage-step.current:not(:first-child)::before {
+    background: #28a745;
+}
+
+.stage-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #fff;
+    border: 3px solid var(--border);
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.stage-step.done .stage-dot {
+    background: #28a745;
+    border-color: #28a745;
+}
+
+.stage-step.current .stage-dot {
+    background: var(--primary);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(217,56,30,0.15);
+}
+
+.stage-label {
+    margin-top: 6px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.stage-step.done .stage-label { color: #15803d; }
+.stage-step.current .stage-label { color: var(--primary); }
+
+/* ------------------------------------------------- */
+/* STATS & GRID LAYOUTS (Owner dashboard)            */
+/* ------------------------------------------------- */
+.grid-layout {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+}
+
+.stat-card {
+    background: var(--bg-white);
+    padding: 1.4rem 1.5rem;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-align: left;
+    border: 1px solid var(--border);
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+/* Soft-tinted icon chip on the left of each metric card */
+.stat-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    flex-shrink: 0;
+}
+
+.stat-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.stat-card h3 {
+    font-size: 1.9rem;
+    font-weight: 700;
+    /* Values wear neutral ink; the tile's colored border + label carry the
+       meaning. Keeps brand red reserved for chrome, warnings, and actions. */
+    color: var(--text-primary);
+    margin-bottom: 2px;
+    line-height: 1;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 1px;
+}
+
+.stat-card p {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+.chart-container {
+    background: var(--bg-white);
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    margin-top: 1.5rem;
+}
+
+/* ------------------------------------------------- */
+/* RESPONSIVE BREAKPOINTS                            */
+/* ------------------------------------------------- */
+@media (max-width: 900px) {
+    /* Stack login vertically on small screens */
+    #view-login { flex-direction: column; }
+    .login-overlay { flex-direction: column; }
+
+    .login-overlay::before {
+        flex: 0 0 180px;
+        min-height: 180px;
+    }
+
+    .login-card-centered {
+        flex: 1;
+        width: 100%;
+        max-width: 100%;
+        padding: 2rem 1.5rem;
+        border-left: none;
+        border-top: 1px solid var(--border);
+    }
+
+    /* Collapse sidebar */
+    .sidebar { width: 200px; min-width: 200px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+    .sidebar { display: none; }
+    .content-body { padding: 1.25rem; }
+    .stats-grid { grid-template-columns: 1fr; }
+    .kanban-board { flex-direction: column; }
+    .stage-column { width: 100%; min-width: unset; }
+    .login-card-centered { padding: 1.5rem; }
+}
+
+/* ------------------------------------------------- */
+/* PRINT STYLES                                      */
+/* ------------------------------------------------- */
+@media print {
+    body { background: #fff; overflow: auto; }
+    .sidebar, .top-header, .btn, .action-btns, .toast-container,
+    .btn-sm, .modal { display: none !important; }
+    .main-content { width: 100%; background: #fff; }
+    .content-body { padding: 1rem; height: auto; overflow: visible; }
+    .table-container { box-shadow: none; border: 1px solid #ccc; }
+    .data-table th,
+    .data-table td { border-bottom: 1px solid #ccc; padding: 0.5rem; }
+    .card { box-shadow: none; border: 1px solid #ccc; }
+}

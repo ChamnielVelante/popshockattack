@@ -45,8 +45,8 @@ class ServiceJob extends Model
                 }
 
                 return $this->warranty_expires_at->isFuture()
-                    ? 'Active (Expires ' . $this->warranty_expires_at->format('m/d/Y') . ')'
-                    : 'Expired (' . $this->warranty_expires_at->format('m/d/Y') . ')';
+                    ? 'Active (Expires '.$this->warranty_expires_at->format('m/d/Y').')'
+                    : 'Expired ('.$this->warranty_expires_at->format('m/d/Y').')';
             },
         );
     }

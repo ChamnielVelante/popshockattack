@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
+use App\Http\Resources\UserResource;
 use App\Models\AppUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -14,32 +18,29 @@ class AuthController extends Controller
      * Public customer self-registration. Accounts start as "pending"
      * until approved by staff.
      */
-    public function register(Request $request): JsonResponse
+    public function register(RegisterRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'username' => 'required|string|min:3|max:50|unique:app_users,username',
-            'password' => 'required|string|min:6',
-        ]);
+        $validated = $request->validated();
 
         $user = AppUser::create([
             'username' => $validated['username'],
             'password' => $validated['password'], // hashed via the model's 'hashed' cast
-            'role' => 'customer',
+            'role' => UserRole::Customer->value,
             'status' => 'pending',
         ]);
 
-        return response()->json(['message' => 'Registered successfully', 'user' => $user], 201);
+        return response()->json([
+            'message' => 'Registered successfully',
+            'user' => new UserResource($user),
+        ], 201);
     }
 
     /**
      * Verify credentials and issue a Sanctum bearer token.
      */
-    public function login(Request $request): JsonResponse
+    public function login(LoginRequest $request): JsonResponse
     {
-        $credentials = $request->validate([
-            'username' => 'required|string',
-            'password' => 'required|string',
-        ]);
+        $credentials = $request->validated();
 
         $user = AppUser::where('username', $credentials['username'])->first();
 
@@ -55,7 +56,7 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Login successful',
-            'user' => $user,
+            'user' => new UserResource($user),
             'token' => $token,
         ]);
     }

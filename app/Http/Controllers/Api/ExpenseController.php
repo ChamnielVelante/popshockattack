@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreExpenseRequest;
+use App\Http\Resources\ExpenseResource;
 use App\Models\Expense;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class ExpenseController extends Controller
 {
@@ -14,19 +15,17 @@ class ExpenseController extends Controller
      */
     public function index(): JsonResponse
     {
-        return response()->json(Expense::orderByDesc('date')->get());
+        return response()->json(ExpenseResource::collection(
+            Expense::orderByDesc('date')->get()
+        ));
     }
 
     /**
      * Record a new shop expense.
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreExpenseRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'description' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0',
-            'date' => 'nullable|date',
-        ]);
+        $validated = $request->validated();
 
         $expense = Expense::create([
             'description' => $validated['description'],
@@ -34,6 +33,9 @@ class ExpenseController extends Controller
             'date' => $validated['date'] ?? now()->toDateString(),
         ]);
 
-        return response()->json(['message' => 'Expense recorded successfully', 'expense' => $expense], 201);
+        return response()->json([
+            'message' => 'Expense recorded successfully',
+            'expense' => new ExpenseResource($expense),
+        ], 201);
     }
 }

@@ -5,15 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MotoTrack | Premium Operations</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <!-- Load order matters: base tokens first, view styles (incl. responsive/print) last -->
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/views.css">
 </head>
 <body>
     <div id="view-login" class="view-section active-view">
         <div class="login-overlay">
             <div class="login-panel-left">
                 <div class="login-logos">
-                   <img src="logo-ae.png" alt="AE Logo" class="logo-ae" />
-                    <img src="PSA.png" alt="Shock Attack" class="logo-psa" />
+                    <img src="img/logo-ae.png" alt="AE Logo" class="logo-ae" />
+                    <img src="img/logo-psa.png" alt="Pops Shock Attack" class="logo-psa" />
                 </div>
                 <div class="login-tagline">
                     <h2>Your Suspension, In Expert Hands</h2>
@@ -106,7 +110,16 @@
                     <h2 id="pageTitle" style="color: var(--text-primary);">Dashboard</h2>
                     <p id="pageDesc" style="color: #777; font-size: 0.9rem;">Overview</p>
                 </div>
-                <div id="headerActions" style="display: flex; gap: 10px; align-items: center;"></div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <div id="headerActions" style="display: flex; gap: 10px; align-items: center;"></div>
+                    <div class="notif-wrap" id="notifWrap">
+                        <button class="notif-bell" onclick="toggleNotifPanel()" aria-label="Notifications">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.737 7.326"/></svg>
+                            <span id="notifBadge" class="notif-badge hidden">0</span>
+                        </button>
+                        <div id="notifPanel" class="notif-panel hidden"></div>
+                    </div>
+                </div>
             </div>
             
             <div class="content-body" id="mainContentArea"></div>
@@ -377,6 +390,7 @@
     <script src="js/views/reports.js"></script>
     <script src="js/views/users.js"></script>
     <script src="js/views/customer.js"></script>
+    <script src="js/notifications.js"></script>
     <script src="js/actions.js"></script>
     <script src="js/receipt.js"></script>
     <script src="js/main.js"></script>

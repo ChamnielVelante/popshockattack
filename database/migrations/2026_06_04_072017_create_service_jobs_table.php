@@ -10,12 +10,12 @@ return new class extends Migration
     {
         Schema::create('service_jobs', function (Blueprint $table) {
             $table->id();
-            $table->string('customer'); 
+            $table->string('customer');
             $table->string('moto_model');
             $table->string('plate_number');
             $table->enum('stage', ['Intake', 'Disassembly', 'Tuning', 'QA', 'Release'])->default('Intake');
             $table->date('date_in');
-            $table->json('specs')->nullable(); 
+            $table->json('specs')->nullable();
             $table->string('warranty_status')->default('Pending');
             $table->boolean('is_warranty_claim')->default(false);
             $table->string('mechanic_name')->nullable();

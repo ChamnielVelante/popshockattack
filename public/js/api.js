@@ -86,5 +86,6 @@ async function syncAllData() {
         fetchInventoryFromDatabase(),
         fetchUsersFromDatabase(),
         fetchExpensesFromDatabase(),
+        fetchNotifications(),
     ]);
 }

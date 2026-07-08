@@ -10,16 +10,16 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-{
-    Schema::create('app_users', function (Blueprint $table) {
-        $table->id();
-        $table->string('username')->unique(); 
-        $table->string('password'); 
-        $table->string('role'); // 'admin', 'staff', or 'customer'
-        $table->string('status')->default('pending');
-        $table->timestamps();
-    });
-}
+    {
+        Schema::create('app_users', function (Blueprint $table) {
+            $table->id();
+            $table->string('username')->unique();
+            $table->string('password');
+            $table->string('role'); // 'admin', 'staff', or 'customer'
+            $table->string('status')->default('pending');
+            $table->timestamps();
+        });
+    }
 
     /**
      * Reverse the migrations.
