@@ -12,12 +12,14 @@ function buildSidebar() {
     if (currentRole === 'admin') {
         nav.innerHTML += `<li class="nav-item active" onclick="loadView('overview')">Shop Overview</li>`;
         nav.innerHTML += `<li class="nav-item" onclick="loadView('kanban')">Stage-Gate Tracker</li>`;
+        nav.innerHTML += `<li class="nav-item" onclick="loadView('history')">Service History</li>`;
         nav.innerHTML += `<li class="nav-item" onclick="loadView('inventory')">Consumables Tracker</li>`;
         nav.innerHTML += `<li class="nav-item" onclick="loadView('reports')">Sales & Reports</li>`;
         nav.innerHTML += `<li class="nav-item" onclick="loadView('users')">Manage Users</li>`;
         loadView('overview');
     } else if (currentRole === 'staff') {
         nav.innerHTML += `<li class="nav-item active" onclick="loadView('kanban')">Active Workflow</li>`;
+        nav.innerHTML += `<li class="nav-item" onclick="loadView('history')">Service History</li>`;
         nav.innerHTML += `<li class="nav-item" onclick="loadView('inventory')">Inventory Check</li>`;
         nav.innerHTML += `<li class="nav-item" onclick="loadView('approvals')">Pending Accounts</li>`;
         loadView('kanban');
@@ -54,6 +56,7 @@ window.loadView = async function (viewType) {
         approvals: renderApprovals,
         reports: renderReports,
         kanban: renderKanban,
+        history: renderHistory,
         inventory: renderInventory,
         users: renderUsers,
         customer: renderCustomerDashboard,

@@ -36,6 +36,32 @@ class ServiceJobController extends Controller
     }
 
     /**
+     * Global service-history search (Objective 2.3): every job ever
+     * recorded — active or released — matched by plate/engine number,
+     * customer, or motorcycle model. Lets staff recover a returning
+     * unit's previous tuning parameters without paper records.
+     */
+    public function search(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'q' => 'required|string|min:2|max:100',
+        ]);
+
+        $term = '%'.$validated['q'].'%';
+
+        $jobs = ServiceJob::where(function ($query) use ($term) {
+            $query->where('plate_number', 'like', $term)
+                ->orWhere('customer', 'like', $term)
+                ->orWhere('moto_model', 'like', $term);
+        })
+            ->orderByDesc('date_in')
+            ->limit(50)
+            ->get();
+
+        return response()->json(ServiceJobResource::collection($jobs));
+    }
+
+    /**
      * Jobs belonging to the logged-in customer only.
      */
     public function myJobs(Request $request): JsonResponse
