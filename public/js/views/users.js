@@ -28,22 +28,42 @@ function renderUsers(ctx) {
 }
 
 function renderApprovals(ctx) {
-    ctx.title.innerText = 'Pending Customer Approvals';
-    ctx.desc.innerText = 'Review and approve new customer registrations';
-
     const pendingUsers = dbUsers.filter(u => u.status === 'pending');
 
-    let html = `<div class="table-container"><table class="data-table"><thead><tr><th>Username</th><th>Action</th></tr></thead><tbody>`;
+    ctx.title.innerText = 'Pending Customer Approvals';
+    ctx.desc.innerText = pendingUsers.length === 0
+        ? 'Review and approve new customer registrations'
+        : `${pendingUsers.length} account${pendingUsers.length === 1 ? '' : 's'} waiting for review`;
+
     if (pendingUsers.length === 0) {
-        html += `<tr><td colspan="2" style="text-align:center; padding: 2rem;">No pending accounts.</td></tr>`;
-    } else {
-        pendingUsers.forEach(u => {
-            html += `<tr>
-                <td><strong>${esc(u.username)}</strong></td>
-                <td><button class="btn btn-primary btn-sm" onclick="approveUser(${u.id})">Approve Account</button></td>
-            </tr>`;
-        });
+        ctx.content.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">${icon('inbox')}</div>
+                <h3>All caught up!</h3>
+                <p>No pending registrations right now.<br>
+                New customer sign-ups will appear here for approval.</p>
+            </div>`;
+        return;
     }
-    html += `</tbody></table></div>`;
-    ctx.content.innerHTML = html;
+
+    let cards = '';
+    pendingUsers.forEach(u => {
+        const registered = u.created_at
+            ? `Registered ${new Date(u.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} · ${notifTimeAgo(u.created_at)}`
+            : 'Registration date unavailable';
+
+        cards += `
+            <div class="approval-card">
+                <div class="avatar-circle">${esc(u.username.charAt(0))}</div>
+                <div class="approval-info">
+                    <div class="username">${esc(u.username)}</div>
+                    <div class="registered">${registered}</div>
+                    <span class="badge-pending">PENDING APPROVAL</span>
+                </div>
+                <button class="btn-sm btn-success" style="width:auto; padding:0.55rem 1rem; white-space:nowrap;"
+                        onclick="approveUser(${u.id})">${icon('check')} Approve</button>
+            </div>`;
+    });
+
+    ctx.content.innerHTML = `<div class="approval-grid">${cards}</div>`;
 }

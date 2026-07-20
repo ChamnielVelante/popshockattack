@@ -205,6 +205,189 @@
 }
 
 /* ------------------------------------------------- */
+/* EMPTY STATES (history search, approvals)          */
+/* ------------------------------------------------- */
+.empty-state {
+    text-align: center;
+    padding: 4.5rem 1rem;
+    color: var(--text-muted);
+}
+
+.empty-state .empty-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 1.25rem;
+    border-radius: 50%;
+    background: var(--bg-white);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    box-shadow: var(--shadow-sm);
+}
+
+.empty-state .empty-icon svg {
+    width: 26px;
+    height: 26px;
+}
+
+.empty-state h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.empty-state p {
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+/* ------------------------------------------------- */
+/* PENDING ACCOUNT APPROVALS                         */
+/* ------------------------------------------------- */
+.approval-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.25rem;
+}
+
+.approval-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--bg-white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.4rem;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.approval-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.avatar-circle {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.approval-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.approval-info .username {
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 0.98rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.approval-info .registered {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.badge-pending {
+    background: #fef9c3;
+    color: #92400e;
+    border: 1px solid #fde68a;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    display: inline-block;
+    margin-top: 6px;
+}
+
+/* ------------------------------------------------- */
+/* SERVICE HISTORY — unit summary + stage pill       */
+/* ------------------------------------------------- */
+.unit-summary {
+    background: var(--bg-white);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--primary);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 2rem;
+}
+
+.unit-summary .unit-title h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.unit-summary .unit-title code {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.summary-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.75rem;
+    margin-left: auto;
+}
+
+.summary-chips .chip {
+    text-align: center;
+}
+
+.summary-chips .chip b {
+    display: block;
+    font-size: 1.15rem;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.summary-chips .chip span {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-weight: 700;
+}
+
+/* Amber pill for units still on the board (history results) */
+.badge-stage {
+    background: #fef9c3;
+    color: #92400e;
+    border: 1px solid #fde68a;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: inline-block;
+    letter-spacing: 0.5px;
+}
+
+/* ------------------------------------------------- */
 /* RESPONSIVE BREAKPOINTS                            */
 /* ------------------------------------------------- */
 @media (max-width: 900px) {

@@ -16,9 +16,10 @@ function renderHistory(ctx) {
     `;
 
     ctx.content.innerHTML = `
-        <div style="text-align:center; padding: 4rem 1rem; color: var(--text-muted);">
-            <p style="font-size: 1.05rem; font-weight: 600; margin-bottom: 6px;">Look up a unit's full service history</p>
-            <p style="font-size: 0.9rem;">Type a plate / engine number, customer username, or motorcycle model above.<br>
+        <div class="empty-state">
+            <div class="empty-icon">${icon('search')}</div>
+            <h3>Look up a unit's full service history</h3>
+            <p>Type a plate / engine number, customer username, or motorcycle model above.<br>
             Results include released jobs, so returning units' previous tuning setups are always recoverable.</p>
         </div>
     `;
@@ -53,12 +54,38 @@ function renderHistoryResults(jobs, q) {
 
     if (jobs.length === 0) {
         content.innerHTML = `
-            <div style="text-align:center; padding: 4rem 1rem; color: var(--text-muted);">
-                <p style="font-size: 1.05rem; font-weight: 600;">No records found for "${esc(q)}"</p>
-                <p style="font-size: 0.9rem; margin-top: 6px;">Check the spelling, or try part of the plate number only.</p>
+            <div class="empty-state">
+                <div class="empty-icon">${icon('search')}</div>
+                <h3>No records found for "${esc(q)}"</h3>
+                <p>Check the spelling, or try part of the plate number only.</p>
             </div>
         `;
         return;
+    }
+
+    // When every result belongs to one unit, lead with its lifetime summary —
+    // the "returning customer" story at a glance.
+    const plates = [...new Set(jobs.map(j => j.plate_number))];
+    let summaryHtml = '';
+    if (plates.length === 1) {
+        const releasedCount = jobs.filter(j => j.stage === 'Release').length;
+        const backJobs = jobs.filter(j => j.is_warranty_claim).length;
+        const totalBilled = jobs.reduce((sum, j) => sum + Number(j.specs?.totalBill || 0), 0);
+        const latest = jobs[0]; // newest first from the API
+
+        summaryHtml = `
+            <div class="unit-summary">
+                <div class="unit-title">
+                    <h3>${esc(latest.moto_model)}</h3>
+                    <code>${esc(latest.plate_number)}</code> · owned by <strong>${esc(latest.customer)}</strong>
+                </div>
+                <div class="summary-chips">
+                    <div class="chip"><b>${jobs.length}</b><span>Visit${jobs.length === 1 ? '' : 's'}</span></div>
+                    <div class="chip"><b>${releasedCount}</b><span>Completed</span></div>
+                    <div class="chip"><b>${backJobs}</b><span>Back-jobs</span></div>
+                    <div class="chip"><b>${peso(totalBilled)}</b><span>Total billed</span></div>
+                </div>
+            </div>`;
     }
 
     let rows = '';
@@ -66,7 +93,7 @@ function renderHistoryResults(jobs, q) {
         const isReleased = job.stage === 'Release';
         const stageBadge = isReleased
             ? `<span class="badge-good">RELEASED</span>`
-            : `<span class="badge-low" style="background:#fef9c3; color:#92400e; border-color:#fde68a;">${esc(job.stage).toUpperCase()}</span>`;
+            : `<span class="badge-stage">${esc(job.stage).toUpperCase()}</span>`;
 
         const claim = job.is_warranty_claim
             ? `<div style="color:#92400e; font-size:0.72rem; font-weight:700; margin-top:3px;">RE-SERVICE CLAIM</div>`
@@ -99,6 +126,7 @@ function renderHistoryResults(jobs, q) {
         <p style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
             <strong>${jobs.length}</strong> record${jobs.length === 1 ? '' : 's'} found for "<strong>${esc(q)}</strong>"
         </p>
+        ${summaryHtml}
         <div class="table-container"><table class="data-table">
             <thead><tr>
                 <th>Date In</th><th>Customer</th><th>Unit</th><th>Status</th>

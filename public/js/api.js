@@ -26,6 +26,16 @@ async function apiFetch(url, options = {}) {
     return response;
 }
 
+// Which caches hold data we have fetched at least once this session.
+// Views render instantly from a synced cache; a mutation calls
+// invalidate() so the next view paint waits for fresh data instead
+// of flashing a stale state.
+const syncedKeys = new Set();
+
+function invalidate(key) {
+    syncedKeys.delete(key);
+}
+
 async function fetchJobsFromDatabase() {
     try {
         // Customers only ever see their own jobs; admin/staff see the full board.
@@ -33,35 +43,38 @@ async function fetchJobsFromDatabase() {
         const response = await apiFetch(endpoint);
         if (!response.ok) throw new Error('Failed to load jobs');
         dbJobs = await response.json();
+        syncedKeys.add('jobs');
     } catch (error) {
         console.error('Failed to pull live jobs:', error);
     }
 }
 
 async function fetchInventoryFromDatabase() {
-    if (currentRole === 'customer') return; // customers have no inventory access
+    if (currentRole === 'customer') { syncedKeys.add('inventory'); return; } // no inventory access
     try {
         const response = await apiFetch('/api/inventory');
         if (!response.ok) throw new Error('Failed to load inventory');
         dbInv = await response.json();
+        syncedKeys.add('inventory');
     } catch (error) {
         console.error('Failed to pull live inventory:', error);
     }
 }
 
 async function fetchUsersFromDatabase() {
-    if (currentRole === 'customer') return; // customers have no user-management access
+    if (currentRole === 'customer') { syncedKeys.add('users'); return; } // no user-management access
     try {
         const response = await apiFetch('/api/users');
         if (!response.ok) throw new Error('Failed to load users');
         dbUsers = await response.json();
+        syncedKeys.add('users');
     } catch (error) {
         console.error('Failed to pull users from database:', error);
     }
 }
 
 async function fetchExpensesFromDatabase() {
-    if (currentRole === 'customer') return; // customers have no expense access
+    if (currentRole === 'customer') { syncedKeys.add('expenses'); return; } // no expense access
     try {
         const response = await apiFetch('/api/expenses');
         if (!response.ok) throw new Error('Failed to load expenses');
@@ -74,12 +87,13 @@ async function fetchExpensesFromDatabase() {
             amount: Number(exp.amount),
             date: exp.date,
         }));
+        syncedKeys.add('expenses');
     } catch (error) {
         console.error('Failed to pull live expenses:', error);
     }
 }
 
-// Refresh every cache the current role has access to.
+// Refresh every cache the current role has access to (login warm-up).
 async function syncAllData() {
     await Promise.all([
         fetchJobsFromDatabase(),

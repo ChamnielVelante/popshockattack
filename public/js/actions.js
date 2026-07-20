@@ -55,6 +55,7 @@ window.submitIntake = async function (e) {
             toggleOtherBrand(); // re-hide the "Others" field after the reset
             closeModal('modal-intake');
             showNotification('Intake successfully registered!', 'success');
+            invalidate('jobs');
             await loadView('kanban');
         } else {
             const data = await response.json().catch(() => ({}));
@@ -75,6 +76,7 @@ window.moveStage = async function (id, nextStage) {
 
         if (response.ok) {
             showNotification(`Moved to ${nextStage}`, 'success');
+            invalidate('jobs');
             await loadView('kanban');
         } else {
             showNotification('Error moving job in database.', 'error');
@@ -94,6 +96,7 @@ window.assignMechanic = async function (id, mechanicName) {
 
         if (response.ok) {
             showNotification(mechanicName ? `Assigned to ${mechanicName}` : 'Mechanic unassigned', 'success');
+            invalidate('jobs');
             await loadView('kanban');
         } else {
             showNotification('Error saving mechanic to database.', 'error');
@@ -112,6 +115,7 @@ window.deleteJob = async function (id) {
 
         if (response.ok) {
             showNotification('Job permanently deleted.', 'success');
+            invalidate('jobs');
             await loadView('kanban');
         } else {
             showNotification('Error deleting job.', 'error');
@@ -195,6 +199,7 @@ window.submitSpecs = async function (e) {
             e.target.reset();
             closeModal('modal-specs');
             showNotification(`Specs logged. Bill: ₱${Number(billedTotal).toLocaleString()}`, 'success');
+            invalidate('jobs');
             await loadView('kanban');
         } else {
             showNotification('Error logging specs.', 'error');
@@ -267,7 +272,8 @@ window.submitItemForm = async function (e) {
 
         closeModal('modal-edit-item');
         showNotification(mode === 'add' ? 'New item saved to database.' : 'Item updated in database.', 'success');
-        await loadView('inventory');
+        invalidate('inventory');
+            await loadView('inventory');
     } catch (error) {
         showNotification('Error: ' + error.message, 'error');
     }
@@ -301,6 +307,7 @@ window.submitAddStock = async function (e) {
         if (response.ok) {
             closeModal('modal-add-stock');
             showNotification(`Added ${qty} units.`, 'success');
+            invalidate('inventory');
             await loadView('inventory');
         } else {
             showNotification('Error adding stock.', 'error');
@@ -321,6 +328,7 @@ window.deleteItem = async function (id) {
 
         if (response.ok) {
             showNotification('Item successfully deleted.', 'success');
+            invalidate('inventory');
             await loadView('inventory');
         } else {
             showNotification('Error deleting item.', 'error');
@@ -395,6 +403,7 @@ window.submitUserForm = async function (e) {
 
         closeModal('modal-manage-user');
         showNotification('User saved to database.', 'success');
+        invalidate('users');
         await loadView('users');
     } catch (error) {
         showNotification('Error: ' + error.message, 'error');
@@ -416,7 +425,8 @@ window.deleteUser = async function (id) {
 
         if (response.ok) {
             showNotification('User deleted.', 'success');
-            await loadView('users');
+            invalidate('users');
+        await loadView('users');
         } else {
             const data = await response.json().catch(() => ({}));
             showNotification(data.message || 'Error deleting user.', 'error');
@@ -433,6 +443,7 @@ window.approveUser = async function (id) {
 
         if (response.ok) {
             showNotification('Account approved!', 'success');
+            invalidate('users');
             await loadView('approvals');
         } else {
             showNotification('Error approving user.', 'error');
@@ -461,6 +472,7 @@ window.submitExpense = async function (e) {
             e.target.reset();
             closeModal('modal-add-expense');
             showNotification('Expense recorded successfully.', 'success');
+            invalidate('expenses');
             await loadView('overview');
         } else {
             showNotification('Error saving expense to database.', 'error');
